@@ -4,16 +4,16 @@ import com.sajith.quotagaurd.entity.Tenant;
 import com.sajith.quotagaurd.service.TenantService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import com.sajith.quotagaurd.limiter.RateLimiterService;
+import com.sajith.quotagaurd.limiter.InMemoryRateLimiter;
 
 @RestController
 @RequestMapping("/api/tenants")
 public class TenantController {
 
     private final TenantService tenantService;
-    private final RateLimiterService rateLimiterService;
+    private final InMemoryRateLimiter rateLimiterService;
 
-    public TenantController(TenantService tenantService, RateLimiterService rateLimiterService) {
+    public TenantController(TenantService tenantService, InMemoryRateLimiter rateLimiterService) {
         this.tenantService = tenantService;
         this.rateLimiterService = rateLimiterService;
     }

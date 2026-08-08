@@ -13,10 +13,10 @@ import java.util.Optional;
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
     private final TenantService tenantService;
-    private final RateLimiterService rateLimiterService;
+    private final InMemoryRateLimiter rateLimiterService;
 
     public RateLimitInterceptor(TenantService tenantService,
-                                RateLimiterService rateLimiterService)
+                                InMemoryRateLimiter rateLimiterService)
     {
         this.tenantService=tenantService;
         this.rateLimiterService=rateLimiterService;
