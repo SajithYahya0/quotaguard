@@ -7,8 +7,11 @@ import java.util.TimeZone;
 @SpringBootApplication
 public class QuotagaurdApplication {
 
+	static {
+		TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+	}
 	public static void main(String[] args) {
-		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kolkata"));
+
 		SpringApplication.run(QuotagaurdApplication.class, args);
 	}
 }
