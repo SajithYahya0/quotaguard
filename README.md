@@ -1,41 +1,50 @@
-# QuotaGuard
+# QuotaGuard — Distributed API Rate Limiter
 
-Multi-tenant API rate limiting with token buckets — tenants register,
-get an API key, and every request is metered against a configurable quota.
+![CI](https://github.com/SajithYahya0/quotaguard/actions/workflows/ci.yml/badge.svg)
 
-## Architecture
+Multi-tenant REST API rate limiter using token buckets. Tenants register for API keys with configurable quotas; enforcement via a Spring `HandlerInterceptor` returning `429` with accurate `Retry-After` and `X-RateLimit-Remaining` headers.
 
-Client ──X-API-Key──► RateLimitInterceptor ──allow──► DemoController
-                            │
-                            └──deny──► 429 + Retry-After
-                            │
-                            ▼
-                     RateLimiterService ── ConcurrentHashMap<apiKey, TokenBucket>
-                            │
-                     TenantService ──► TenantRepository ──► PostgreSQL
+## The distributed problem (and the fix)
 
-## API
+v1 kept token buckets in a `ConcurrentHashMap` guarded by `synchronized`.
+That is a JVM-scoped lock. Run two instances behind a load balancer and a
+capacity-10 tenant gets 20 requests through — each instance hands out its
+own quota.
 
-| Method | Path                    | Auth      | Description             |
-|--------|-------------------------|-----------|-------------------------|
-| POST   | /api/tenants            | none      | Register, get API key   |
-| PUT    | /api/tenants/{id}/limits| none      | Update quota config     |
-| GET    | /api/data/quote         | X-API-Key | Rate-limited resource   |
+Reproduce it yourself:
 
-## Run it
+    docker compose up --build
+    ./burst.sh <api-key>
 
-1. docker run --name quotaguard-db -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=quotaguard -e TZ=Asia/Kolkata -p 5432:5432 -d postgres
-2. .\mvnw spring-boot:run
-3. POST /api/tenants → copy apiKey → GET /api/data/quote with X-API-Key header
+| quotaguard.limiter | admitted (capacity 10) |
+|--------------------|------------------------|
+| memory             | ~20  ← the bug         |
+| redis              | 10   ← correct          |
 
-## Design decisions
+**Fix:** bucket state moved to Redis, and read-refill-decide-write became a
+single Lua script. Redis executes commands single-threaded, so the script is
+atomic across every instance. The script uses Redis' own `TIME` so clock skew
+between app servers can't corrupt the refill maths.
 
-- Token bucket over fixed window: allows short bursts, no spike at the window edge
-- Lazy refill: no background threads; tokens are recomputed from elapsed time on each request
-- Per-bucket synchronized: each tenant's bucket locks independently; verified with a 20-thread test
-- In-memory buckets: simple, but single-instance only — Redis/Bucket4j would be the multi-instance path
-- ddl-auto=update: convenient for development, not for production
+Both implementations ship behind a `RateLimiter` interface and are selected by
+the `quotaguard.limiter` property — the in-memory one is kept deliberately so
+the failure above stays demonstrable.
 
-## Tests
+## Quick start
 
-.\mvnw test — includes a concurrent stress test proving exactly N admissions under load
+```bash
+# prerequisites: Docker
+docker compose up --build
+
+# create a tenant
+curl -X POST http://localhost:8080/api/tenants \
+  -H "Content-Type: application/json" \
+  -d '{"name":"acme","capacity":10,"refillPerSec":0.1}'
+
+# burst test (use the apiKey from the response above)
+./burst.sh <api-key>
+```
+
+## Tech stack
+
+Java 21, Spring Boot 4.1, Spring Data JPA, Spring Data Redis, PostgreSQL, Redis, Lua, Docker Compose, GitHub Actions
