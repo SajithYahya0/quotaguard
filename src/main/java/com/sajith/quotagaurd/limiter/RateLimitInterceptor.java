@@ -12,14 +12,18 @@ import java.util.Optional;
 
 @Component
 public class RateLimitInterceptor implements HandlerInterceptor {
+
+
+
     private final TenantService tenantService;
-    private final InMemoryRateLimiter rateLimiterService;
+    private final RateLimiter rateLimiter;
+
 
     public RateLimitInterceptor(TenantService tenantService,
-                                InMemoryRateLimiter rateLimiterService)
+                                RateLimiter rateLimiter)
     {
         this.tenantService=tenantService;
-        this.rateLimiterService=rateLimiterService;
+        this.rateLimiter=rateLimiter;
     }
 
     @Override
@@ -37,14 +41,19 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         }
 
         Tenant t = tenant.get();
-        if(!rateLimiterService.tryConsume(t))
-        {
-            response.setHeader("X-RateLimit-Limit",String.valueOf(t.getCapacity()));
-            response.setHeader("Retry-After","1");
-            return reject(response,429,"Rate limit exceeded");
+        RateLimiter.Decision d = rateLimiter.tryConsume(t);
+
+        response.setHeader("X-RateLimit-Limit", String.valueOf(t.getCapacity()));
+        if (d.remaining() >= 0) {
+            response.setHeader("X-RateLimit-Remaining", String.valueOf(d.remaining()));
         }
 
-
+        if (!d.allowed()) {
+            if (d.retryAfterSeconds() > 0) {
+                response.setHeader("Retry-After", String.valueOf(d.retryAfterSeconds()));
+            }
+            return reject(response, 429, "Rate limit exceeded");
+        }
         return true;
     }
     private boolean reject(HttpServletResponse response,int status,String message)throws IOException{
