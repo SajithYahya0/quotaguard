@@ -4,6 +4,7 @@ import com.sajith.quotaguard.entity.Tenant;
 import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -29,23 +30,29 @@ public class RedisRateLimiter implements RateLimiter {
     @Override
     @SuppressWarnings("unchecked")
     public Decision tryConsume(Tenant tenant) {
-        List<Long> r = redis.execute(
-            script,
-            List.of(key(tenant.getApiKey())),
-            String.valueOf(tenant.getCapacity()),
-            String.valueOf(tenant.getRefillPerSec()),
-            String.valueOf(ttlFor(tenant))
-        );
-        return new Decision(r.get(0) == 1L, r.get(1), r.get(2));
+        try {
+            List<Long> r = redis.execute(
+                script,
+                List.of(key(tenant)),
+                String.valueOf(tenant.getCapacity()),
+                String.valueOf(tenant.getRefillPerSec()),
+                String.valueOf(ttlFor(tenant))
+            );
+            return new Decision(r.get(0) == 1L, r.get(1), r.get(2));
+        } catch (DataAccessException e) {
+            // Spring translates Lettuce timeouts and connection failures into DataAccessException.
+            throw new LimiterUnavailableException("Redis unavailable", e);
+        }
     }
 
     @Override
-    public void invalidate(String apiKey) {
-        redis.delete(key(apiKey));
+    public void invalidate(Tenant tenant) {
+        redis.delete(key(tenant));
     }
 
-    private String key(String apiKey) {
-        return "quota:" + apiKey;
+    // Keyed by tenant id, not API key: no secret sits in Redis, and rotating a key keeps the bucket.
+    private String key(Tenant tenant) {
+        return "quota:tenant:" + tenant.getId();
     }
 
     private long ttlFor(Tenant t) {

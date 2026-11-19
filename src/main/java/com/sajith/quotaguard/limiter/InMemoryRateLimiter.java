@@ -9,18 +9,18 @@ import org.springframework.stereotype.Service;
 @ConditionalOnProperty(name = "quotaguard.limiter", havingValue = "memory", matchIfMissing = true)
 public class InMemoryRateLimiter implements RateLimiter {
 
-    private final ConcurrentHashMap<String, TokenBucket> buckets = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, TokenBucket> buckets = new ConcurrentHashMap<>();
 
     @Override
     public Decision tryConsume(Tenant tenant) {
-        TokenBucket bucket = buckets.computeIfAbsent(tenant.getApiKey(), key ->
+        TokenBucket bucket = buckets.computeIfAbsent(tenant.getId(), id ->
             new TokenBucket(tenant.getCapacity(), tenant.getRefillPerSec())
         );
         return new Decision(bucket.tryConsume(), -1, 1);
     }
 
     @Override
-    public void invalidate(String apiKey) {
-        buckets.remove(apiKey);
+    public void invalidate(Tenant tenant) {
+        buckets.remove(tenant.getId());
     }
 }

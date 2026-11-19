@@ -22,28 +22,39 @@ public class TenantController {
 
     public record UpdateLimitsRequest(int capacity, double refillPerSec) {}
 
-    public record TenantResponse(Long id, String name, String apiKey, int capacity, double refillPerSec) {}
+    /** Only returned by create: the one time the raw key is shown. */
+    public record CreatedTenantResponse(
+        Long id,
+        String name,
+        String apiKey,
+        int capacity,
+        double refillPerSec
+    ) {}
+
+    public record TenantResponse(Long id, String name, int capacity, double refillPerSec) {}
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TenantResponse create(@RequestBody CreateTenantRequest req) {
-        return toResponse(tenantService.create(req.name(), req.capacity(), req.refillPerSec()));
+    public CreatedTenantResponse create(@RequestBody CreateTenantRequest req) {
+        TenantService.CreatedTenant created = tenantService.create(
+            req.name(),
+            req.capacity(),
+            req.refillPerSec()
+        );
+        Tenant t = created.tenant();
+        return new CreatedTenantResponse(
+            t.getId(),
+            t.getName(),
+            created.apiKey(),
+            t.getCapacity(),
+            t.getRefillPerSec()
+        );
     }
 
     @PutMapping("/{id}/limits")
     public TenantResponse updateLimits(@PathVariable Long id, @RequestBody UpdateLimitsRequest req) {
         Tenant t = tenantService.updateLimits(id, req.capacity(), req.refillPerSec());
-        rateLimiter.invalidate(t.getApiKey());
-        return toResponse(t);
-    }
-
-    private TenantResponse toResponse(Tenant t) {
-        return new TenantResponse(
-            t.getId(),
-            t.getName(),
-            t.getApiKey(),
-            t.getCapacity(),
-            t.getRefillPerSec()
-        );
+        rateLimiter.invalidate(t);
+        return new TenantResponse(t.getId(), t.getName(), t.getCapacity(), t.getRefillPerSec());
     }
 }

@@ -52,6 +52,27 @@ curl -X POST http://localhost:8080/api/tenants \
 ./burst.sh <api-key>            # Windows PowerShell: .\burst.ps1 -Key <api-key>
 ```
 
+## Production hardening
+
+- **Hashed API keys:** Postgres stores `SHA-256(key)`; the raw key is returned once, at creation. Buckets are keyed by tenant id, so no secret sits in Redis.
+- **Tenant cache:** Caffeine caches the key-to-tenant lookup for 30 s (misses too), so the hot path is one Redis round trip instead of Postgres plus Redis. A limit update evicts locally; other instances catch up within 30 s.
+- **Redis failure mode:** Redis calls time out at 200 ms. `quotaguard.fail-open=true` (default) keeps serving with `X-RateLimit-Status: degraded`; `false` returns `503` with `Retry-After: 1`.
+
+## Load test
+
+```bash
+docker compose up --build -d
+k6 run loadtest/quota.js            # options: -e RATE=500 -e BASE_URL=http://localhost:8081
+```
+
+Measured on a GitHub Actions runner (Nov 2026): one instance, the same k6 script at 500 req/s for 60 s
+(30,000 requests, 0 errors), JVM warmed up with a discarded run first.
+
+| Build | p50 | p95 | p99 |
+|---|---|---|---|
+| Postgres lookup on every request | 0.53 ms | 0.61 ms | 1.12 ms |
+| Caffeine tenant cache | 0.36 ms | 0.41 ms | 0.66 ms |
+
 ## Run the tests
 
 ```bash
@@ -61,4 +82,4 @@ docker compose up -d postgres redis   # the tests use real Postgres and Redis
 
 ## Tech stack
 
-Java 21, Spring Boot 4.1, Spring Data JPA, Spring Data Redis, PostgreSQL, Redis, Lua, Docker Compose, GitHub Actions
+Java 21, Spring Boot 4.1, Spring Data JPA, Spring Data Redis, PostgreSQL, Redis, Lua, Caffeine, Docker Compose, GitHub Actions, k6
