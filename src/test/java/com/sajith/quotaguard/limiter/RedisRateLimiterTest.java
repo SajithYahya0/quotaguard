@@ -1,22 +1,24 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
-import com.sajith.quotagaurd.entity.Tenant;
+import static org.junit.jupiter.api.Assertions.*;
+
+import com.sajith.quotaguard.entity.Tenant;
+import java.util.UUID;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.UUID;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @TestPropertySource(properties = "quotaguard.limiter=redis")
 class RedisRateLimiterTest {
 
-    @Autowired RateLimiter limiter;
+    // Concrete type on purpose: if the Redis bean is not wired, the context fails to load
+    // instead of the test quietly running against the in-memory limiter.
+    @Autowired
+    RedisRateLimiter limiter;
 
     @Test
     void concurrentConsume_neverOverAdmits() throws Exception {

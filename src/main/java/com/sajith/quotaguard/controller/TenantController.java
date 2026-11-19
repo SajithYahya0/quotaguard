@@ -1,8 +1,8 @@
-package com.sajith.quotagaurd.controller;
+package com.sajith.quotaguard.controller;
 
-import com.sajith.quotagaurd.entity.Tenant;
-import com.sajith.quotagaurd.limiter.RateLimiter;
-import com.sajith.quotagaurd.service.TenantService;
+import com.sajith.quotaguard.entity.Tenant;
+import com.sajith.quotaguard.limiter.RateLimiter;
+import com.sajith.quotaguard.service.TenantService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +19,9 @@ public class TenantController {
     }
 
     public record CreateTenantRequest(String name, int capacity, double refillPerSec) {}
+
     public record UpdateLimitsRequest(int capacity, double refillPerSec) {}
+
     public record TenantResponse(Long id, String name, String apiKey, int capacity, double refillPerSec) {}
 
     @PostMapping
@@ -36,6 +38,12 @@ public class TenantController {
     }
 
     private TenantResponse toResponse(Tenant t) {
-        return new TenantResponse(t.getId(), t.getName(), t.getApiKey(), t.getCapacity(), t.getRefillPerSec());
+        return new TenantResponse(
+            t.getId(),
+            t.getName(),
+            t.getApiKey(),
+            t.getCapacity(),
+            t.getRefillPerSec()
+        );
     }
 }

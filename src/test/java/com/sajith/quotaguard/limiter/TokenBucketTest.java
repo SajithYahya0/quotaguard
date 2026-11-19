@@ -1,19 +1,19 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class TokenBucketTest {
+
     @Test
-    void allowsUpToCapacity_thenRejects(){
-        TokenBucket bucket = new TokenBucket(3,0);
+    void allowsUpToCapacity_thenRejects() {
+        TokenBucket bucket = new TokenBucket(3, 0);
         assertTrue(bucket.tryConsume());
         assertTrue(bucket.tryConsume());
         assertTrue(bucket.tryConsume());
@@ -21,27 +21,25 @@ public class TokenBucketTest {
     }
 
     @Test
-    void concurrentConsume_neverOverAdmits() throws Exception{
-        TokenBucket bucket = new TokenBucket(100,0);
+    void concurrentConsume_neverOverAdmits() throws Exception {
+        TokenBucket bucket = new TokenBucket(100, 0);
         ExecutorService pool = Executors.newFixedThreadPool(20);
         CountDownLatch start = new CountDownLatch(1);
         AtomicInteger admitted = new AtomicInteger();
 
-        for(int i=0;i<500;i++)
-        {
-            pool.submit(()->{
+        for (int i = 0; i < 500; i++) {
+            pool.submit(() -> {
                 start.await();
-                if(bucket.tryConsume()){
+                if (bucket.tryConsume()) {
                     admitted.incrementAndGet();
-                }return null;
+                }
+                return null;
             });
         }
         start.countDown();
         pool.shutdown();
         assertTrue(pool.awaitTermination(10, TimeUnit.SECONDS));
 
-        assertEquals(100,admitted.get());
-
+        assertEquals(100, admitted.get());
     }
-
 }

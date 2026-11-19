@@ -11,10 +11,17 @@ That is a JVM-scoped lock. Run two instances behind a load balancer and a
 capacity-10 tenant gets 20 requests through — each instance hands out its
 own quota.
 
-Reproduce it yourself:
+Reproduce it yourself (create a tenant first, see Quick start):
 
-    docker compose up --build
-    ./burst.sh <api-key>
+    QUOTAGUARD_LIMITER=memory docker compose up --build   # v1 limiter
+    ./burst.sh <api-key>                                  # ~20 admitted
+
+    docker compose up --build                             # redis limiter (default)
+    ./burst.sh <api-key>                                  # 10 admitted
+
+Compose runs two app instances (ports 8080 and 8081) against one Postgres and
+one Redis; `burst.sh` alternates requests between them like a round-robin
+load balancer.
 
 | quotaguard.limiter | admitted (capacity 10) |
 |--------------------|------------------------|
@@ -42,7 +49,14 @@ curl -X POST http://localhost:8080/api/tenants \
   -d '{"name":"acme","capacity":10,"refillPerSec":0.1}'
 
 # burst test (use the apiKey from the response above)
-./burst.sh <api-key>
+./burst.sh <api-key>            # Windows PowerShell: .\burst.ps1 -Key <api-key>
+```
+
+## Run the tests
+
+```bash
+docker compose up -d postgres redis   # the tests use real Postgres and Redis
+./mvnw verify
 ```
 
 ## Tech stack

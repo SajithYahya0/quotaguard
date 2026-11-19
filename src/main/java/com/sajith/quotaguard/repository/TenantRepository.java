@@ -1,8 +1,8 @@
-package com.sajith.quotagaurd.repository;
+package com.sajith.quotaguard.repository;
 
-import com.sajith.quotagaurd.entity.Tenant;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.sajith.quotaguard.entity.Tenant;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TenantRepository extends JpaRepository<Tenant, Long> {
     Optional<Tenant> findByApiKey(String apiKey);
