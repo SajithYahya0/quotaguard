@@ -52,6 +52,13 @@ curl -X POST http://localhost:8080/api/tenants \
 ./burst.sh <api-key>            # Windows PowerShell: .\burst.ps1 -Key <api-key>
 ```
 
+## Run the tests
+
+```bash
+docker compose up -d postgres redis   # the tests use real Postgres and Redis
+./mvnw verify
+```
+
 ## Tech stack
 
 Java 21, Spring Boot 4.1, Spring Data JPA, Spring Data Redis, PostgreSQL, Redis, Lua, Docker Compose, GitHub Actions
