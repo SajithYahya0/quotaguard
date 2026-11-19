@@ -1,14 +1,14 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
 
-import com.sajith.quotagaurd.entity.Tenant;
+import com.sajith.quotaguard.entity.Tenant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
-@ConditionalOnProperty(name ="quotagaurd.limiter",havingValue="memory",matchIfMissing = true)
+@ConditionalOnProperty(name ="quotaguard.limiter",havingValue="memory",matchIfMissing = true)
 public class InMemoryRateLimiter implements RateLimiter{
     private final ConcurrentHashMap<String,TokenBucket>buckets = new ConcurrentHashMap<>();
     @Override

@@ -1,8 +1,8 @@
-package com.sajith.quotagaurd.controller;
+package com.sajith.quotaguard.controller;
 
-import com.sajith.quotagaurd.entity.Tenant;
-import com.sajith.quotagaurd.limiter.RateLimiter;
-import com.sajith.quotagaurd.service.TenantService;
+import com.sajith.quotaguard.entity.Tenant;
+import com.sajith.quotaguard.limiter.RateLimiter;
+import com.sajith.quotaguard.service.TenantService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 

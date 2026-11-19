@@ -1,4 +1,4 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
 public class TokenBucket {
     private final int capacity;

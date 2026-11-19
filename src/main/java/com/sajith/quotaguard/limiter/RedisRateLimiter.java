@@ -1,7 +1,7 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
 
-import com.sajith.quotagaurd.entity.Tenant;
+import com.sajith.quotaguard.entity.Tenant;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-@ConditionalOnProperty(name="quotagaurd.limiter",havingValue = "redis")
+@ConditionalOnProperty(name="quotaguard.limiter",havingValue = "redis")
 public class    RedisRateLimiter implements RateLimiter {
     private static final long TTL_FLOOR_SECONDS = 60;
 

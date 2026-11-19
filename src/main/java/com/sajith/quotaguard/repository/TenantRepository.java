@@ -1,6 +1,6 @@
-package com.sajith.quotagaurd.repository;
+package com.sajith.quotaguard.repository;
 
-import com.sajith.quotagaurd.entity.Tenant;
+import com.sajith.quotaguard.entity.Tenant;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

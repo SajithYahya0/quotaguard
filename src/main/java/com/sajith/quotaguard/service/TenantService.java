@@ -1,7 +1,7 @@
-package com.sajith.quotagaurd.service;
+package com.sajith.quotaguard.service;
 
-import com.sajith.quotagaurd.entity.Tenant;
-import com.sajith.quotagaurd.repository.TenantRepository;
+import com.sajith.quotaguard.entity.Tenant;
+import com.sajith.quotaguard.repository.TenantRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;

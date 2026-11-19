@@ -1,4 +1,4 @@
-package com.sajith.quotagaurd.controller;
+package com.sajith.quotaguard.controller;
 
 import org.springframework.web.bind.annotation.*;
 import java.time.Instant;

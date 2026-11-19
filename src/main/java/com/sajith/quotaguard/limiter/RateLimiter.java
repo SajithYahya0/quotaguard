@@ -1,6 +1,6 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
-import com.sajith.quotagaurd.entity.Tenant;
+import com.sajith.quotaguard.entity.Tenant;
 
 public interface RateLimiter {
     record Decision(boolean allowed,long remaining,long retryAfterSeconds)

@@ -1,4 +1,4 @@
-package com.sajith.quotagaurd.entity;
+package com.sajith.quotaguard.entity;
 
 import jakarta.persistence.*;
 

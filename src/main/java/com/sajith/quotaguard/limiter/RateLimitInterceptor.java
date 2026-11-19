@@ -1,7 +1,7 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
-import com.sajith.quotagaurd.entity.Tenant;
-import com.sajith.quotagaurd.service.TenantService;
+import com.sajith.quotaguard.entity.Tenant;
+import com.sajith.quotaguard.service.TenantService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;

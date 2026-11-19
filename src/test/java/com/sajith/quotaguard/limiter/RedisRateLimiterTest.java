@@ -1,6 +1,6 @@
-package com.sajith.quotagaurd.limiter;
+package com.sajith.quotaguard.limiter;
 
-import com.sajith.quotagaurd.entity.Tenant;
+import com.sajith.quotaguard.entity.Tenant;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

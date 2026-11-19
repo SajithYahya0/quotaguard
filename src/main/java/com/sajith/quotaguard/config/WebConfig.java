@@ -1,7 +1,7 @@
-package com.sajith.quotagaurd.config;
+package com.sajith.quotaguard.config;
 
 
-import com.sajith.quotagaurd.limiter.RateLimitInterceptor;
+import com.sajith.quotaguard.limiter.RateLimitInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;

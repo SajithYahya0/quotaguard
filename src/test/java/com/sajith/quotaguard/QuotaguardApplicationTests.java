@@ -1,10 +1,10 @@
-package com.sajith.quotagaurd;
+package com.sajith.quotaguard;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class QuotagaurdApplicationTests {
+class QuotaguardApplicationTests {
 
 	@Test
 	void contextLoads() {
