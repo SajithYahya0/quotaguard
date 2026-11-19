@@ -34,6 +34,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quotaguard
       SPRING_DATA_REDIS_HOST: redis
       QUOTAGUARD_LIMITER: ${QUOTAGUARD_LIMITER:-redis}
+      QUOTAGUARD_FAIL_OPEN: ${QUOTAGUARD_FAIL_OPEN:-true}
     depends_on:
       postgres:
         condition: service_healthy
