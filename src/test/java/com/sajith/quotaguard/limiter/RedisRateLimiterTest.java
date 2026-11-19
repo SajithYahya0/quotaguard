@@ -16,7 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(properties = "quotaguard.limiter=redis")
 class RedisRateLimiterTest {
 
-    @Autowired RateLimiter limiter;
+    // Concrete type on purpose: if the Redis bean is not wired, the context fails to load
+    // instead of the test quietly running against the in-memory limiter.
+    @Autowired RedisRateLimiter limiter;
 
     @Test
     void concurrentConsume_neverOverAdmits() throws Exception {
