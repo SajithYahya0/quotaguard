@@ -1,0 +1,44 @@
+# Two app instances share one Postgres and one Redis: the setup that exposed the v1 bug.
+#
+#   docker compose up --build                             # redis limiter (default)
+#   QUOTAGUARD_LIMITER=memory docker compose up --build   # v1 in-memory limiter, to reproduce the bug
+#   PowerShell: $env:QUOTAGUARD_LIMITER="memory"; docker compose up --build
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: quotaguard
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d quotaguard"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app1: &app
+    build: .
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/quotaguard
+      SPRING_DATA_REDIS_HOST: redis
+      QUOTAGUARD_LIMITER: ${QUOTAGUARD_LIMITER:-redis}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+
+  app2:
+    <<: *app
+    ports:
+      - "8081:8080"
