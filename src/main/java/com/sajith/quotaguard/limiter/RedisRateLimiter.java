@@ -31,7 +31,7 @@ public class RedisRateLimiter implements RateLimiter {
     public Decision tryConsume(Tenant tenant) {
         List<Long> r = redis.execute(
             script,
-            List.of(key(tenant.getApiKey())),
+            List.of(key(tenant)),
             String.valueOf(tenant.getCapacity()),
             String.valueOf(tenant.getRefillPerSec()),
             String.valueOf(ttlFor(tenant))
@@ -40,12 +40,13 @@ public class RedisRateLimiter implements RateLimiter {
     }
 
     @Override
-    public void invalidate(String apiKey) {
-        redis.delete(key(apiKey));
+    public void invalidate(Tenant tenant) {
+        redis.delete(key(tenant));
     }
 
-    private String key(String apiKey) {
-        return "quota:" + apiKey;
+    // Keyed by tenant id, not API key: no secret sits in Redis, and rotating a key keeps the bucket.
+    private String key(Tenant tenant) {
+        return "quota:tenant:" + tenant.getId();
     }
 
     private long ttlFor(Tenant t) {

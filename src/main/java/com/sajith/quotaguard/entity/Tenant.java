@@ -11,8 +11,8 @@ public class Tenant {
 
     private String name;
 
-    @Column(unique = true)
-    private String apiKey;
+    @Column(unique = true, length = 64)
+    private String apiKeyHash;
 
     private int capacity;
     private double refillPerSec;
@@ -33,12 +33,12 @@ public class Tenant {
         this.name = name;
     }
 
-    public String getApiKey() {
-        return apiKey;
+    public String getApiKeyHash() {
+        return apiKeyHash;
     }
 
-    public void setApiKey(String apiKey) {
-        this.apiKey = apiKey;
+    public void setApiKeyHash(String apiKeyHash) {
+        this.apiKeyHash = apiKeyHash;
     }
 
     public int getCapacity() {

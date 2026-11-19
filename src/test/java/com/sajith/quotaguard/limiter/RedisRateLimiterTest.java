@@ -3,7 +3,6 @@ package com.sajith.quotaguard.limiter;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.sajith.quotaguard.entity.Tenant;
-import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
@@ -23,7 +22,7 @@ class RedisRateLimiterTest {
     @Test
     void concurrentConsume_neverOverAdmits() throws Exception {
         Tenant t = new Tenant();
-        t.setApiKey(UUID.randomUUID().toString());
+        t.setId(ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE)); // fresh bucket every run
         t.setCapacity(100);
         t.setRefillPerSec(0);
 

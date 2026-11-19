@@ -7,5 +7,5 @@ public interface RateLimiter {
 
     Decision tryConsume(Tenant tenant);
 
-    void invalidate(String apiKey);
+    void invalidate(Tenant tenant);
 }
